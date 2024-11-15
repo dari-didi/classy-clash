@@ -5,25 +5,22 @@ Enemy::Enemy(Vector2 pos, Texture2D idle_texture, Texture2D run_texture)
 {
     worldPos = pos;
     texture = idle_texture;
+    idle = idle_texture;
     run = run_texture;
-    worldPos = pos;
     width = texture.width / maxFrames;
     height = texture.height;
+    speed = 2.5f;
 }
 
-void Enemy::tick(float deltaTime){
-    worldPosLastFrame = worldPos;
 
-    runningTime += deltaTime;
-    if (runningTime >= updateTime)
-    {
-        runningTime = 0.f;
-        frame++;
-        if (frame > maxFrames)
-            frame = 0;
-    }
+// get toTarget -> normalize toTarget -> multiply toTarget by speed -> move enemy(set worldPos)
+void Enemy::tick(float deltaTime)
+{
+    // get toTarget
+    velocity = Vector2Subtract(target->getScreenPos(), getScreenPos());
+    Basecharacter::tick(deltaTime);
+}
 
-    Rectangle source{width * frame, 0.f, rightLeft * width, height};
-    Rectangle dest{worldPos.x, worldPos.y, width * scale, height * scale};
-    DrawTexturePro(texture, source, dest, worldPos, 0.f, WHITE);
+Vector2 Enemy::getScreenPos(){
+    return Vector2Subtract(worldPos, target->getWorldPos());        
 }

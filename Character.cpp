@@ -1,50 +1,46 @@
+
+
 #include "Character.h"
 #include "raymath.h"
 
-Character::Character(int winWidth, int winHeight)
+Character::Character(int winWidth, int winHeight) :
+    windowWidth(winWidth),
+    windowHeight(winHeight)
 {
     width = texture.width / maxFrames;
     height = texture.height;
-    screenPos = {
-        static_cast<float>(winWidth) / 2.0f - (0.5f * width * scale),
-        static_cast<float>(winHeight) / 2.0f - (0.5f * height * scale)};
+}
+Vector2 Character::getScreenPos(){
+    return Vector2{
+        static_cast<float>(windowWidth) / 2.0f - (0.5f * width * scale),
+        static_cast<float>(windowHeight) / 2.0f - (0.5f * height * scale)
+    };
 }
 
 void Character::tick(float deltaTime)
 {
-    worldPosLastFrame = worldPos;
-    Vector2 direction{};
+    
     if (IsKeyDown(KEY_A))
-        direction.x -= 1.0;
+        velocity.x -= 1.0;
     if (IsKeyDown(KEY_D))
-        direction.x += 1.0;
+        velocity.x += 1.0;
     if (IsKeyDown(KEY_W))
-        direction.y -= 1.0;
+        velocity.y -= 1.0;
     if (IsKeyDown(KEY_S))
-        direction.y += 1.0;
+        velocity.y += 1.0;
+    Basecharacter::tick(deltaTime);
 
-    if (Vector2Length(direction) != 0.0)
+    Vector2 origin{};
+    if (rightLeft > 0.f)
     {
-        // set mapPos = mapPos - direction
-        // set worlPos = worlPos + direction
-        worldPos = Vector2Add(worldPos, Vector2Scale(Vector2Normalize(direction), speed));
-        direction.x < 0.f ? rightLeft = -1.f : rightLeft = 1.f;
-        texture = run;
+        origin = {0.f, weapon.height * scale};
+    } else {
+        origin = {0.f, 0.f};
     }
-    else
-    {
-        texture = idle;
-    }
-    runningTime += deltaTime;
-    if (runningTime >= updateTime)
-    {
-        runningTime = 0.f;
-        frame++;
-        if (frame > maxFrames)
-            frame = 0;
-    }
+    
 
-    Rectangle source{width * frame, 0.f, rightLeft * width, height};
-    Rectangle dest{screenPos.x, screenPos.y, width * scale, height * scale};
-    DrawTexturePro(texture, source, dest, {0, 0}, 0.f, WHITE);
+    Rectangle source{0.f, 0.f, static_cast<float>(weapon.width) * rightLeft, static_cast<float>(weapon.height)};
+    Rectangle dest{getScreenPos().x, getScreenPos().y, weapon.width * scale, weapon.height * scale};
+    DrawTexturePro(weapon, source, dest, origin, 0.f, WHITE);
+
 }
