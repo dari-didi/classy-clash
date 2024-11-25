@@ -42,7 +42,7 @@ void Basecharacter::tick(float deltaTime){
     {
         texture = idle;
     }
-    velocity = {0,0};
+    velocity = {};
         // draw the character
     Rectangle source{frame * width, 0.f, rightLeft * width, height};
     Rectangle dest{getScreenPos().x, getScreenPos().y, scale * width, scale * height};

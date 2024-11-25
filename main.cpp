@@ -3,6 +3,7 @@
 #include "Character.h"
 #include "Prop.h"
 #include "Enemy.h"
+#include <string>
 
 int main()
 {
@@ -18,29 +19,28 @@ int main()
 
     Prop props[2]{
         Prop{Vector2{600.f, 300.f}, LoadTexture("nature_tileset/Rock.png")},
-        Prop{Vector2{400.f, 500.f}, LoadTexture("nature_tileset/Log.png")}
-    };
+        Prop{Vector2{400.f, 500.f}, LoadTexture("nature_tileset/Log.png")}};
 
     Enemy goblin{
         Vector2{},
-        LoadTexture("characters/goblin_run_spritesheet.png"),
-        LoadTexture("characters/goblin_run_spritesheet.png")
-    };
+        LoadTexture("characters/goblin_idled_spritesheet.png"),
+        LoadTexture("characters/goblin_run_spritesheet.png")};
 
     Enemy slime{
-        Vector2{300,500},
+        Vector2{300, 500},
         LoadTexture("characters/slime_idle_spritesheet.png"),
-        LoadTexture("characters/slime_run_spritesheet.png")
-    };
+        LoadTexture("characters/slime_run_spritesheet.png")};
 
-    Enemy goblin2{
-        Vector2{300,800},
-        LoadTexture("characters/goblin_run_spritesheet.png"),
-        LoadTexture("characters/goblin_run_spritesheet.png")
-    };
-    goblin.setTarget(&knight);
-    slime.setTarget(&knight);
-    goblin2.setTarget(&knight);
+    Enemy *enemies[]{
+        &goblin,
+        &slime};
+
+    for (auto enemy : enemies)
+    {
+        enemy->setTarget(&knight);
+    }
+    // goblin.setTarget(&knight);
+    // slime.setTarget(&knight);
 
     SetTargetFPS(60);
     while (!WindowShouldClose())
@@ -57,6 +57,18 @@ int main()
         for (auto prop : props)
         {
             prop.Render(knight.getWorldPos());
+        }
+        if (!knight.getAlive())
+        {
+            DrawText("Game Over!", 55.f, 45.f, 40, RED);
+            EndDrawing();
+            continue;
+        }
+        else
+        {
+            std::string knightsHealth{"Health: "};
+            knightsHealth.append(std::to_string(knight.getHealth()), 0, 5);
+            DrawText(knightsHealth.c_str(), 55.f, 45.f, 40, RED);
         }
 
         knight.tick(GetFrameTime());
@@ -77,8 +89,20 @@ int main()
             }
         }
 
-        //goblin.tick(GetFrameTime());
-        //slime.tick(GetFrameTime());
+        // goblin.tick(GetFrameTime());
+        //  slime.tick(GetFrameTime());
+        for (auto enemy : enemies)
+        {
+            enemy->tick(GetFrameTime());
+
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                if (CheckCollisionRecs(enemy->getCollisionRec(), knight.getWeaponCollisionRec()))
+                {
+                    enemy->setAlive(false);
+                }
+            }
+        }
 
         EndDrawing();
     }
